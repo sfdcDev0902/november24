@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>CreateEntitlementController</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>createEntitlement</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    <types>
+        <members>Entitlement_Page</members>
+        <name>FlexiPage</name>
+    </types>
+    <version>62.0</version>
+</Package>

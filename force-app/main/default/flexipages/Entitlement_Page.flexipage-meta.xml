@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>accountFields</name>
+                    <value>Name, Phone, AccountNumber, Website</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>entitlementFields</name>
+                    <value>Entitlement_ID__c, Entitlement_Date__c, Sales_Rep__c, Purchase_Order__c, Invoice_ID__c, Invoice_Date__c, Entitlement_Note__c</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>fieldApiNameEntitlementToAccount</name>
+                    <value>Account__c</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>fieldApiNameLineItemToEntitlement</name>
+                    <value>Entitlement__c</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>lineItemFieldsObject</name>
+                    <value>{&quot;summaryFields&quot;:[{&quot;label&quot;:&quot;Catalog Item ID&quot;,&quot;fieldName&quot;:&quot;Catalog_Item_ID__c&quot;,&quot;dataType&quot;:&quot;text&quot;,&quot;value&quot;:&quot;&quot;,&quot;isRequired&quot;:false},{&quot;label&quot;:&quot;Effective Date&quot;,&quot;fieldName&quot;:&quot;Effective_Date__c&quot;,&quot;dataType&quot;:&quot;date&quot;,&quot;value&quot;:&quot;&quot;,&quot;isRequired&quot;:false},{&quot;label&quot;:&quot;Expiration Date&quot;,&quot;fieldName&quot;:&quot;Expiration_Date__c&quot;,&quot;dataType&quot;:&quot;date&quot;,&quot;value&quot;:&quot;&quot;,&quot;isRequired&quot;:false},{&quot;label&quot;:&quot;Qty&quot;,&quot;fieldName&quot;:&quot;Quantity__c&quot;,&quot;dataType&quot;:&quot;number&quot;,&quot;value&quot;:&quot;1&quot;,&quot;isRequired&quot;:true},{&quot;label&quot;:&quot;Status&quot;,&quot;fieldName&quot;:&quot;Status__c&quot;,&quot;dataType&quot;:&quot;text&quot;,&quot;value&quot;:&quot;Active&quot;,&quot;isRequired&quot;:false}],&quot;detailFields&quot;:[{&quot;label&quot;:&quot;List Price&quot;,&quot;fieldName&quot;:&quot;List_Price__c&quot;,&quot;dataType&quot;:&quot;text&quot;,&quot;value&quot;:&quot;&quot;,&quot;isRequired&quot;:false},{&quot;label&quot;:&quot;Sales Price&quot;,&quot;fieldName&quot;:&quot;Sales_Price__c&quot;,&quot;dataType&quot;:&quot;number&quot;,&quot;value&quot;:&quot;&quot;,&quot;isRequired&quot;:false}]}</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>objectApiNameAccount</name>
+                    <value>Account</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>objectApiNameEntitlement</name>
+                    <value>Entitlement__c</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>objectApiNameLineItem</name>
+                    <value>Entitlement_Line_Item__c</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>recordId</name>
+                    <value>0017F00000aMjJdQAK</value>
+                </componentInstanceProperties>
+                <componentName>createEntitlement</componentName>
+                <identifier>c_createEntitlement</identifier>
+            </componentInstance>
+        </itemInstances>
+        <name>main</name>
+        <type>Region</type>
+    </flexiPageRegions>
+    <masterLabel>Entitlement Page</masterLabel>
+    <template>
+        <name>flexipage:defaultAppHomeTemplate</name>
+    </template>
+    <type>AppPage</type>
+</FlexiPage>

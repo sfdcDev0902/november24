@@ -1,0 +1,127 @@
+<template>
+    <div class="slds-box" style="background: white;">
+        <!--HEADER-->
+        <div class="pageHeaderContainer">
+            <p class="pageHeader">Entitle Account</p>
+            <p class="instructions">To entitle an account fill out the form below. Click <b>Entitle Account</b> to submit</p>
+        </div>
+        
+        <!--HEADER-->
+
+        <!--SECTION 1-->
+        <div>
+            <p class="sectionHeader">Account Details</p>
+            <lightning-record-view-form object-api-name={objectApiNameAccount} record-id={recordId}>
+                <lightning-layout horizontal-align="spread" multiple-rows>
+                    <template for:each={accountFieldArray} for:item="eachAccountField">
+                        <lightning-layout-item padding="horizontal-medium" size="6" key={eachAccountField}>
+                            <lightning-output-field field-name={eachAccountField}> </lightning-output-field>
+                        </lightning-layout-item>
+                    </template>
+                </lightning-layout>
+            </lightning-record-view-form>
+        </div>
+        <!--SECTION 1-->
+        <hr/>
+        <!--SECTION 2-->
+        <div>
+            <p class="sectionHeader">Entitlement Details</p>
+            <p class="instructions">Unless marked with an *, the fields below are optional. They are used for your reference. <span style="color:red"> * Required Information</span></p>
+            <lightning-record-edit-form object-api-name={objectApiNameEntitlement}>
+                <lightning-input-field data-id="entitlementFields" class="slds-hidden" field-name={fieldApiNameEntitlementToAccount} value={recordId}></lightning-input-field>
+                <lightning-layout horizontal-align="spread" multiple-rows>
+                    <template for:each={entitlementFieldArray} for:item="eachEntitlementField">
+                        <lightning-layout-item padding="horizontal-medium" size="6" key={eachEntitlementField}>
+                            <lightning-input-field data-id="entitlementFields" field-name={eachEntitlementField}> </lightning-input-field>
+                        </lightning-layout-item>
+                    </template>
+                </lightning-layout>
+            </lightning-record-edit-form>
+        </div>
+        <!--SECTION 2-->
+        <hr/>
+        <!--SECTION 3-->
+        <div>
+            <p class="sectionHeader">Line Items</p>
+            <div style="margin-top:1rem;margin-bottom:0.5rem;">
+                <lightning-button label={expandCollapseBtnLabel} onclick={doExpandCollapseAll}></lightning-button>
+            </div>
+            <table>
+                <tr style="background: #f5f5f5; font-weight:bold;">
+                    <td></td>
+                    <td>Line</td>
+                    <template for:each={lineItemFieldsObject.summaryFields} for:item="eachLineItemSummaryField">
+                        <td key={eachLineItemSummaryField}>
+                            <abbr if:true={eachLineItemSummaryField.isRequired} style="color:red">*</abbr>{eachLineItemSummaryField.label}
+                        </td>
+                    </template>
+                    <td></td>
+                </tr>
+                <template for:each={lineItems} for:item="eachLineItem" for:index="line">
+                    <tr key={eachLineItem}>
+                        <td style="text-align: center;"><lightning-icon size="small" data-id={eachLineItem.lineNumber} icon-name={eachLineItem.expandOrCollapseIcon} onclick={expandOrCollapseSection}></lightning-icon></td>
+                        <td>{eachLineItem.lineNumber}</td>
+                        <template for:each={eachLineItem.summaryFields} for:item="eachLineItemSummaryField">
+                            <td style="padding:0.5rem" key={eachLineItemSummaryField}>
+                                <lightning-input data-id={eachLineItem.lineNumber} 
+                                                 data-name={eachLineItemSummaryField.fieldName} 
+                                                 value={eachLineItemSummaryField.value} 
+                                                 variant="label-hidden" 
+                                                 type={eachLineItemSummaryField.dataType} 
+                                                 onchange={setLineItemFields}>
+                                </lightning-input>
+                            </td>
+                        </template>
+                        <td><lightning-button-icon data-id={eachLineItem.lineNumber} icon-name="utility:delete" class="slds-m-left_xx-small" title="Delete" onclick={deleteRow}></lightning-button-icon></td>
+                    </tr>
+                    <template if:true={eachLineItem.isExpanded}>
+                        <tr key={eachLineItem.lineNumber}>
+                            <td colspan={expandedSectionColSpan}>
+                                <div class="slds-box">
+                                    <lightning-layout horizontal-align="spread" multiple-rows>
+                                        <template for:each={eachLineItem.detailFields} for:item="eachLineItemDetailField">
+                                            <lightning-layout-item padding="horizontal-medium" size="6" key={eachLineItemDetailField.fieldName}>
+                                                <lightning-input data-id={eachLineItem.lineNumber} 
+                                                                 data-name={eachLineItemDetailField.fieldName} 
+                                                                 value={eachLineItemDetailField.value} 
+                                                                 label={eachLineItemDetailField.label} 
+                                                                 type={eachLineItemDetailField.dataType}
+                                                                 onchange={setLineItemFields}>
+                                                </lightning-input>
+                                            </lightning-layout-item>
+                                        </template>
+                                        <lightning-layout-item padding="horizontal-medium" size="6">
+                                            <lightning-file-upload label="Attach Document" variant="label-inline"></lightning-file-upload>
+                                        </lightning-layout-item>
+                                    </lightning-layout>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
+                </template>
+            </table>
+
+            <div class="slds-box" style="padding:0.5rem; background: #f5f5f5;">
+                <lightning-layout >
+                        <lightning-layout-item padding="horizontal-small" style="padding-top: 0.5rem;">
+                            <p>Number Of Lines To Add</p>
+                        </lightning-layout-item>
+                        <lightning-layout-item padding="horizontal-small" >
+                            <lightning-input variant="label-hidden" onchange={setLinesToAdd}></lightning-input>
+                        </lightning-layout-item>
+                        <lightning-layout-item padding="horizontal-small" >
+                            <lightning-button label="Add More Line Items" title="Add More Line Items" icon-name="utility:add" class="slds-m-left_x-small" onclick={addLines}></lightning-button>
+                        </lightning-layout-item>
+                </lightning-layout>
+            </div>
+        </div>
+        <!--SECTION 3-->
+        <br/>
+        <!--BUTTONS-->
+        <div class="slds-box" style="text-align: center; background: #f5f5f5;">
+            <span style="margin-right:1rem;"><lightning-button label="Cancel" variant="neutral" onclick={navigateBack}></lightning-button></span>
+            <span><lightning-button label="Entitle Account" variant="brand" onclick={onCreate}></lightning-button></span>
+        </div>
+        <!--BUTTONS-->
+    </div>
+</template>
