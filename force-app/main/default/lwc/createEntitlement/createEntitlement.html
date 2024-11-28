@@ -63,13 +63,36 @@
                         <td>{eachLineItem.lineNumber}</td>
                         <template for:each={eachLineItem.summaryFields} for:item="eachLineItemSummaryField">
                             <td style="padding:0.5rem" key={eachLineItemSummaryField}>
-                                <lightning-input data-id={eachLineItem.lineNumber} 
-                                                 data-name={eachLineItemSummaryField.fieldName} 
-                                                 value={eachLineItemSummaryField.value} 
-                                                 variant="label-hidden" 
-                                                 type={eachLineItemSummaryField.dataType} 
-                                                 onchange={setLineItemFields}>
-                                </lightning-input>
+                                <template lwc:if={eachLineItemSummaryField.isPicklist}>
+                                    <lightning-combobox variant="label-hidden" 
+                                                        name={eachLineItemSummaryField.label} 
+                                                        value={eachLineItemSummaryField.value} 
+                                                        data-id={eachLineItem.lineNumber} 
+                                                        data-name={eachLineItemSummaryField.fieldName} 
+                                                        placeholder="Select Value"
+                                                        options={eachLineItemSummaryField.picklistValues} 
+                                                        onchange={setLineItemFields} >
+                                    </lightning-combobox>
+                                </template>
+                                <template lwc:elseif={eachLineItemSummaryField.isLookup}>
+                                    <lightning-record-picker object-api-name={eachLineItemSummaryField.lookupDetails.objectApiName}
+                                                             label={eachLineItemSummaryField.label}
+                                                             variant="label-hidden" 
+                                                             filter={eachLineItemSummaryField.lookupDetails.filter}
+                                                             data-id={eachLineItem.lineNumber} 
+                                                             data-name={eachLineItemSummaryField.fieldName}
+                                                             onchange={setLineItemFields}>
+                                    </lightning-record-picker>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-input data-id={eachLineItem.lineNumber} 
+                                                    data-name={eachLineItemSummaryField.fieldName} 
+                                                    value={eachLineItemSummaryField.value} 
+                                                    variant="label-hidden" 
+                                                    type={eachLineItemSummaryField.dataType} 
+                                                    onchange={setLineItemFields}>
+                                    </lightning-input>
+                                </template>
                             </td>
                         </template>
                         <td><lightning-button-icon data-id={eachLineItem.lineNumber} icon-name="utility:delete" class="slds-m-left_xx-small" title="Delete" onclick={deleteRow}></lightning-button-icon></td>
@@ -81,13 +104,35 @@
                                     <lightning-layout horizontal-align="spread" multiple-rows>
                                         <template for:each={eachLineItem.detailFields} for:item="eachLineItemDetailField">
                                             <lightning-layout-item padding="horizontal-medium" size="6" key={eachLineItemDetailField.fieldName}>
-                                                <lightning-input data-id={eachLineItem.lineNumber} 
-                                                                 data-name={eachLineItemDetailField.fieldName} 
-                                                                 value={eachLineItemDetailField.value} 
-                                                                 label={eachLineItemDetailField.label} 
-                                                                 type={eachLineItemDetailField.dataType}
-                                                                 onchange={setLineItemFields}>
-                                                </lightning-input>
+                                                <template lwc:if={eachLineItemDetailField.isPicklist}>
+                                                    <lightning-combobox variant="label-hidden" 
+                                                                        name={eachLineItemDetailField.label} 
+                                                                        value={eachLineItemDetailField.value} 
+                                                                        data-id={eachLineItem.lineNumber} 
+                                                                        data-name={eachLineItemDetailField.fieldName} 
+                                                                        placeholder="Select Value"
+                                                                        options={eachLineItemDetailField.picklistValues} 
+                                                                        onchange={setLineItemFields} >
+                                                    </lightning-combobox>
+                                                </template>
+                                                <template lwc:elseif={eachLineItemDetailField.isLookup}>
+                                                    <lightning-record-picker object-api-name={eachLineItemDetailField.lookupDetails.objectApiName}
+                                                                             label={eachLineItemDetailField.label}
+                                                                             filter={eachLineItemDetailField.lookupDetails.filter}
+                                                                             data-id={eachLineItem.lineNumber} 
+                                                                             data-name={eachLineItemDetailField.fieldName}
+                                                                             onchange={setLineItemFields}>
+                                                    </lightning-record-picker>
+                                                </template>
+                                                <template lwc:else>
+                                                    <lightning-input data-id={eachLineItem.lineNumber} 
+                                                                    data-name={eachLineItemDetailField.fieldName} 
+                                                                    value={eachLineItemDetailField.value}
+                                                                    label={eachLineItemDetailField.label}
+                                                                    type={eachLineItemDetailField.dataType} 
+                                                                    onchange={setLineItemFields}>
+                                                    </lightning-input>
+                                                </template>
                                             </lightning-layout-item>
                                         </template>
                                         <lightning-layout-item padding="horizontal-medium" size="6">

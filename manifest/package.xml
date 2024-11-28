@@ -6,11 +6,16 @@
     </types>
     <types>
         <members>createEntitlement</members>
+        <members>redirectToCreateEntitlement</members>
         <name>LightningComponentBundle</name>
     </types>
     <types>
         <members>Entitlement_Page</members>
         <name>FlexiPage</name>
+    </types>
+    <types>
+        <members>Account.Create_Entitlement_Redirect</members>
+        <name>QuickAction</name>
     </types>
     <version>62.0</version>
 </Package>

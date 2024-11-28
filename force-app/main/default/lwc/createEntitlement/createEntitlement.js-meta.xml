@@ -10,7 +10,7 @@
 	</targets>
     <targetConfigs>
 		<targetConfig targets="lightning__AppPage">
-			<property label="AccountId" name="recordId" type="String" />
+			<property label="AccountId (Optional - Set From URL Params)" name="recordId" type="String" />
 			<property label="Account Object API Name" name="objectApiNameAccount" type="String" />
 			<property label="Entitlement Object API Name" name="objectApiNameEntitlement" type="String" />
 			<property label="Line Item Object API Name" name="objectApiNameLineItem" type="String" />

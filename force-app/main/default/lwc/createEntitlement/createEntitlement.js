@@ -1,6 +1,6 @@
-import { LightningElement, api, track } from 'lwc';
+import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { NavigationMixin } from "lightning/navigation";
+import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import createEntitlement from '@salesforce/apex/CreateEntitlementController.createEntitlement';
 
 const ACCOUNT_OBJ_API_NAME = 'Account';
@@ -30,6 +30,13 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
     entitlementFieldArray = new Array();
     linesToAdd = 1;
     expandedSectionColSpan;
+
+    @wire(CurrentPageReference)
+    getStateParameters(currentPageReference) {
+       if (currentPageReference) {
+          this.recordId = currentPageReference.state?.c__recordId;
+       }
+    }
 
     connectedCallback() {
         this.accountFieldArray = this.accountFields?.replaceAll(' ','')?.split(',');
@@ -113,16 +120,20 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
     setLineItemFields(event){
         let relevantLine = event.target.dataset.id;
         let fieldName = event.target.dataset.name;
+        let value = event.target.value;
+        if(event.target.tagName == 'LIGHTNING-RECORD-PICKER'){
+            value = event.detail.recordId;
+        }
         this.lineItems.forEach( (eachLine) => {
             if(eachLine.lineNumber == relevantLine){
                 eachLine.summaryFields.forEach( (eachLineSummaryField) => {
                     if(eachLineSummaryField.fieldName == fieldName){
-                        eachLineSummaryField.value = event.target.value;
+                        eachLineSummaryField.value = value;
                     }
                 });
                 eachLine.detailFields.forEach( (eachLineDetailField) => {
                     if(eachLineDetailField.fieldName == fieldName){
-                        eachLineDetailField.value = event.target.value;
+                        eachLineDetailField.value = value;
                     }
                 });
             }
