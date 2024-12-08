@@ -206,6 +206,12 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
         lineItemFields.forEach( (lineItem, index) => {
             self.lineItemFieldsObject.summaryFields.forEach( eachField => {
                 let fieldUi = this.template.querySelector(`lightning-input[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
+                if(fieldUi == null || fieldUi == undefined){
+                    fieldUi = this.template.querySelector(`lightning-record-picker[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
+                    if(fieldUi == null || fieldUi == undefined){
+                        fieldUi = this.template.querySelector(`lightning-combobox[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
+                    }
+                }
                 if(lineItem[eachField.fieldName] != undefined && lineItem[eachField.fieldName] != null && lineItem[eachField.fieldName] != ""){
                     if(eachField.validation){
                         if(!eval(eachField.validation.validationFormula)){
