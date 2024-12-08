@@ -11,7 +11,7 @@ const LINEITEM_ENTITLEMENT_LOOKUP_FIELD = 'Entitlement__c';
 
 const ACCFIELDS = 'Name, Phone, AccountNumber, Website';
 const ENTFIELDS = 'Entitlement_ID__c, Entitlement_Date__c, Sales_Rep__c, Purchase_Order__c, Invoice_ID__c, Invoice_Date__c, Entitlement_Note__c';
-const LINEITEMFIELDS = '{"summaryFields":[{"label":"Catalog Item ID","fieldName":"Catalog_Item_ID__c","dataType":"text","value":"","isRequired":false},{"label":"Effective Date","fieldName":"Effective_Date__c","dataType":"date","value":"","isRequired":false},{"label":"Expiration Date","fieldName":"Expiration_Date__c","dataType":"date","value":"","isRequired":false},{"label":"Qty","fieldName":"Quantity__c","dataType":"number","value":"1","isRequired":true},{"label":"Status","fieldName":"Status__c","dataType":"text","value":"Active","isRequired":false}],"detailFields":[{"label":"List Price","fieldName":"List_Price__c","dataType":"text","value":"","isRequired":false},{"label":"Sales Price","fieldName":"Sales_Price__c","dataType":"number","value":"","isRequired":false}]}';
+const LINEITEMFIELDS = '{"summaryFields":[{"label":"Catalog Item ID","fieldName":"Catalog_Item_ID__c","dataType":"text","value":"","isRequired":false},{"label":"Effective Date","fieldName":"Effective_Date__c","dataType":"date","value":"","isRequired":false,"validation":{"validationFormula":"eachLineSummaryField.Effective_Date__c < eachLineSummaryField.Expiration_Date__c","validationMessage":"Effective Date should be less than Expiration Date"}},{"label":"Expiration Date","fieldName":"Expiration_Date__c","dataType":"date","value":"","isRequired":false,"validation":{"validationFormula":"eachLineSummaryField.Effective_Date__c < eachLineSummaryField.Expiration_Date__c","validationMessage":"Expiration Date should be greater than Effective Date"}},{"label":"Qty","fieldName":"Quantity__c","dataType":"number","value":"1","isRequired":true},{"label":"Status","fieldName":"Status__c","dataType":"text","value":"Active","isRequired":false}],"detailFields":[{"label":"List Price","fieldName":"List_Price__c","dataType":"text","value":"","isRequired":false,"validationFormula":"eachLineSummaryField.Effective_Date__c < eachLineSummaryField.Expiration_Date__c"},{"label":"Sales Price","fieldName":"Sales_Price__c","dataType":"number","value":"","isRequired":false}]}';
 
 export default class CreateEntitlement extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -23,6 +23,9 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
     @api objectApiNameLineItem = LINEITEM_OBJ_API_NAME;
     @api fieldApiNameEntitlementToAccount = ENTITLEMENT_ACCOUNT_LOOKUP_FIELD;
     @api fieldApiNameLineItemToEntitlement = LINEITEM_ENTITLEMENT_LOOKUP_FIELD;
+    @api successMessage;
+    @api errorMessage;
+    @api validationsErrorMessage;
 
     @track lineItems = new Array();
 
@@ -154,7 +157,7 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
     }
 
     createLineItems(entitlementFieldsToSubmit){
-        let hasError = false;
+        
         //let parentId = event.detail.id;
         let lineItemFields = new Array();
         this.lineItems.forEach( (eachLine) => {
@@ -173,25 +176,94 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
             lineItemFields.push(fields);
         });
         
-        createEntitlement({
-            entitlementJson: JSON.stringify(entitlementFieldsToSubmit),
-            lineItemsJson: JSON.stringify(lineItemFields)
-        }).then(result => {
-            const toastEvt = new ShowToastEvent({
-                variant: "success",
-                title: "Success",
-                message: "Entitlement Created!"
+        if(this.isDataValid(lineItemFields)){
+            createEntitlement({
+                entitlementJson: JSON.stringify(entitlementFieldsToSubmit),
+                lineItemsJson: JSON.stringify(lineItemFields)
+            }).then(result => {
+                const toastEvt = new ShowToastEvent({
+                    variant: "success",
+                    title: "Success",
+                    message: this.successMessage ? this.successMessage : "Entitlement Created!"
+                });
+                this.dispatchEvent(toastEvt);
+                this.navigateBack();
+            }).catch(error => {
+                const toastEvt = new ShowToastEvent({
+                    variant: "error",
+                    title: "Something went wrong!",
+                    message: this.errorMessage ? this.errorMessage : error.body.message
+                });
+                this.dispatchEvent(toastEvt);
             });
-            this.dispatchEvent(toastEvt);
-            this.navigateBack();
-        }).catch(error => {
+        }
+    }
+
+    isDataValid(lineItemFields){
+        let hasErrors = false;
+        
+        var self = this;
+        lineItemFields.forEach( (lineItem, index) => {
+            self.lineItemFieldsObject.summaryFields.forEach( eachField => {
+                let fieldUi = this.template.querySelector(`lightning-input[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
+                if(lineItem[eachField.fieldName] != undefined && lineItem[eachField.fieldName] != null && lineItem[eachField.fieldName] != ""){
+                    if(eachField.validation){
+                        if(!eval(eachField.validation.validationFormula)){
+                            fieldUi.setCustomValidity(eachField.validation.validationMessage);
+                            fieldUi.reportValidity();
+                            hasErrors = true;
+                        } else{
+                            fieldUi.setCustomValidity('');
+                            fieldUi.reportValidity();
+                        }
+                    } else{
+                        fieldUi.setCustomValidity('');
+                        fieldUi.reportValidity();
+                    }
+                } else if(lineItem[eachField.fieldName] == undefined || lineItem[eachField.fieldName] == null || lineItem[eachField.fieldName] == ""){
+                    if(eachField.isRequired){
+                        fieldUi.setCustomValidity('Complete this field.');
+                        fieldUi.reportValidity();
+                        hasErrors = true;
+                    }
+                }
+            });
+            self.lineItemFieldsObject.detailFields.forEach( eachField => {
+                let fieldUi = this.template.querySelector(`lightning-input[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
+                if(lineItem[eachField.fieldName] != undefined && lineItem[eachField.fieldName] != null && lineItem[eachField.fieldName] != ""){
+                    if(eachField.validation){
+                        if(!eval(eachField.validation.validationFormula)){
+                            fieldUi.setCustomValidity(eachField.validation.validationMessage);
+                            fieldUi.reportValidity();
+                            hasErrors = true;
+                        } else{
+                            fieldUi.setCustomValidity('');
+                            fieldUi.reportValidity();
+                        }
+                    } else{
+                        fieldUi.setCustomValidity('');
+                        fieldUi.reportValidity();
+                    }
+                } else if(lineItem[eachField.fieldName] == undefined || lineItem[eachField.fieldName] == null || lineItem[eachField.fieldName] == ""){
+                    if(eachField.isRequired){
+                        fieldUi.setCustomValidity('Complete this field.');
+                        fieldUi.reportValidity();
+                        hasErrors = true;
+                    }
+                }
+            });
+        });
+
+        if(hasErrors){
             const toastEvt = new ShowToastEvent({
                 variant: "error",
-                title: "Something went wrong!",
-                message: message
+                title: "Error",
+                message: this.validationsErrorMessage ? this.validationsErrorMessage : "Please fix the validations before proceeding!"
             });
             this.dispatchEvent(toastEvt);
-        });
+        }
+
+        return !hasErrors;
     }
 
     navigateBack(){

@@ -19,6 +19,9 @@
 			<property label="Account Fields (Comma Separated)" name="accountFields" type="String" />
 			<property label="Entitlement Fields (Comma Separated)" name="entitlementFields" type="String" />
 			<property label="Line Item Fields" name="lineItemFieldsObject" type="String" />
+			<property label="Success Message" name="successMessage" type="String" default="Entitlement Created!"/>
+			<property label="Error Message" name="errorMessage" type="String" />
+			<property label="Validations Error Message" name="validationsErrorMessage" type="String" default="Please fix the validations before proceeding!"/>
 		</targetConfig>
 	</targetConfigs>
 </LightningComponentBundle>
