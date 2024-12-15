@@ -1,0 +1,61 @@
+<template>
+    <div class="slds-box" style="background: white;">
+
+        <div class="slds-box" style="background: white;">
+            <lightning-layout horizontal-align="spread" multiple-rows>
+                <template for:each={searchFilters} for:item="eachSearchFilter">
+                    <lightning-layout-item padding="horizontal-medium" size="3" key={eachSearchFilter.placeholder}>
+                        <lightning-input type="search" 
+                                         variant="label-hidden" 
+                                         placeholder={eachSearchFilter.placeholder} 
+                                         data-column={eachSearchFilter.fieldName}
+                                         data-condition={eachSearchFilter.condition}
+                                         onchange={filterData}>
+                        </lightning-input>
+                    </lightning-layout-item>
+                </template>
+            </lightning-layout>
+        </div>
+        <br/>
+        <table>
+            <tr style="background: #f5f5f5; font-weight:bold;">
+                <template for:each={addOnFields.summaryFields} for:item="eachField">
+                    <td key={eachField.fieldName}>{eachField.label}</td>
+                </template>
+            </tr>
+            <template for:each={addOnData} for:item="eachRow" for:index="rowIndex">
+                <tr key={eachRow}>
+                    <template for:each={eachRow.summaryFields} for:item="eachField" for:index="fieldIndex">
+                        <td key={eachField}>
+                            <template if:true={eachField.isReadOnly}>
+                                <template lwc:if={eachField.isDate}> 
+                                    <lightning-formatted-date-time value={eachField.value}></lightning-formatted-date-time>
+                                </template>
+                                <template lwc:elseif={eachField.isUrl}>
+                                    <lightning-formatted-rich-text value={eachField.value}></lightning-formatted-rich-text>
+                                </template>
+                                <template lwc:else>
+                                    {eachField.value}
+                                </template>
+                            </template>
+                            <template if:false={eachField.isReadOnly}>
+                                <lightning-input value={eachField.value} 
+                                                 type="text" 
+                                                 variant="label-hidden" 
+                                                 data-index={rowIndex}
+                                                 data-name={eachField.fieldName}
+                                                 onchange={updateDataOnFile}>
+                                </lightning-input>
+                            </template>
+                        </td>
+                    </template>
+                </tr>
+            </template>
+        </table>
+        <br/>
+        <div class="slds-box" style="text-align: center; background: #f5f5f5;">
+            <span style="margin-right:1rem;"><lightning-button label="Cancel" variant="neutral" onclick={navigateBack}></lightning-button></span>
+            <span><lightning-button label="Map Add-Ons" variant="brand" onclick={doMapAddOns}></lightning-button></span>
+        </div>
+    </div>
+</template>

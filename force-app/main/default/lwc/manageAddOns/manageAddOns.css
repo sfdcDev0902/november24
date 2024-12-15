@@ -1,0 +1,26 @@
+.sectionHeader{
+	font-size: 1.5rem;
+	color: #4084c0;
+}
+
+.pageHeader{
+	font-size: 2.5rem;
+	color: #4084c0;
+}
+
+.pageHeaderContainer{
+	margin-bottom: 1rem;
+}
+
+.instructions{
+	color: gray;
+}
+
+td{
+	padding: 0.5rem;
+}
+
+table, th, td {
+	border: 1px solid #cbcbcb;
+	border-collapse: collapse;
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
+    <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
+                <componentInstanceProperties>
+                    <name>addOnFieldsJson</name>
+                    <value>{&quot;summaryFields&quot;:[{&quot;label&quot;:&quot;Add On&quot;,&quot;fieldName&quot;:&quot;Catalog_Item_ID__c&quot;,&quot;dataType&quot;:&quot;text&quot;,&quot;isRequired&quot;:false,&quot;isReadOnly&quot;:true},{&quot;label&quot;:&quot;Activation Code&quot;,&quot;fieldName&quot;:&quot;Catalog_Item_ID__c&quot;,&quot;dataType&quot;:&quot;text&quot;,&quot;isRequired&quot;:false,&quot;isReadOnly&quot;:true},{&quot;label&quot;:&quot;System Entitlement Id&quot;,&quot;fieldName&quot;:&quot;Entitlement__r.Name&quot;,&quot;idField&quot;:&quot;Entitlement__c&quot;,&quot;dataType&quot;:&quot;recordLink&quot;,&quot;isRequired&quot;:false,&quot;isReadOnly&quot;:true},{&quot;label&quot;:&quot;License Model&quot;,&quot;fieldName&quot;:&quot;Lead__r.Name&quot;,&quot;idField&quot;:&quot;Lead__c&quot;,&quot;dataType&quot;:&quot;recordLink&quot;,&quot;isRequired&quot;:false,&quot;isReadOnly&quot;:true},{&quot;label&quot;:&quot;Expiration&quot;,&quot;fieldName&quot;:&quot;Expiration_Date__c&quot;,&quot;dataType&quot;:&quot;date&quot;,&quot;isRequired&quot;:false,&quot;isReadOnly&quot;:true},{&quot;label&quot;:&quot;Available Units In Line Item&quot;,&quot;fieldName&quot;:&quot;Remaining_Quantity__c&quot;,&quot;dataType&quot;:&quot;number&quot;,&quot;isRequired&quot;:true,&quot;isReadOnly&quot;:true},{&quot;label&quot;:&quot;Total Units In Line Item&quot;,&quot;fieldName&quot;:&quot;Quantity__c&quot;,&quot;dataType&quot;:&quot;text&quot;,&quot;isRequired&quot;:false,&quot;isReadOnly&quot;:true},{&quot;label&quot;:&quot;Qty To Add&quot;,&quot;fieldName&quot;:&quot;Quantity__c&quot;,&quot;dataType&quot;:&quot;text&quot;,&quot;value&quot;:&quot;&quot;,&quot;isRequired&quot;:false,&quot;isReadOnly&quot;:false,&quot;validation&quot;:{&quot;validationFormula&quot;:&quot;eachLineSummaryField.Quantity__c &lt; eachLineSummaryField.Remaining_Quantity__c&quot;,&quot;validationMessage&quot;:&quot;Quantity cannot be more than the Available Quantity&quot;}}]}</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>objectApiNameLicenses</name>
+                </componentInstanceProperties>
+                <componentName>manageAddOns</componentName>
+                <identifier>c_manageAddOns</identifier>
+            </componentInstance>
+        </itemInstances>
+        <name>main</name>
+        <type>Region</type>
+    </flexiPageRegions>
+    <masterLabel>Manage Add-Ons</masterLabel>
+    <template>
+        <name>flexipage:defaultAppHomeTemplate</name>
+    </template>
+    <type>AppPage</type>
+</FlexiPage>
