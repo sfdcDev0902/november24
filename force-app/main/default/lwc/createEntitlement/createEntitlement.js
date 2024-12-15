@@ -2,6 +2,7 @@ import { LightningElement, api, track, wire } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin, CurrentPageReference } from "lightning/navigation";
 import createEntitlement from '@salesforce/apex/CreateEntitlementController.createEntitlement';
+import uploadFile from '@salesforce/apex/CreateEntitlementController.uploadFile';
 
 const ACCOUNT_OBJ_API_NAME = 'Account';
 const ENTITLEMENT_OBJ_API_NAME = 'Entitlement__c';
@@ -10,8 +11,8 @@ const ENTITLEMENT_ACCOUNT_LOOKUP_FIELD = 'Account__c';
 const LINEITEM_ENTITLEMENT_LOOKUP_FIELD = 'Entitlement__c';
 
 const ACCFIELDS = 'Name, Phone, AccountNumber, Website';
-const ENTFIELDS = 'Entitlement_ID__c, Entitlement_Date__c, Sales_Rep__c, Purchase_Order__c, Invoice_ID__c, Invoice_Date__c, Entitlement_Note__c';
-const LINEITEMFIELDS = '{"summaryFields":[{"label":"Catalog Item ID","fieldName":"Catalog_Item_ID__c","dataType":"text","value":"","isRequired":false},{"label":"Effective Date","fieldName":"Effective_Date__c","dataType":"date","value":"","isRequired":false,"validation":{"validationFormula":"eachLineSummaryField.Effective_Date__c < eachLineSummaryField.Expiration_Date__c","validationMessage":"Effective Date should be less than Expiration Date"}},{"label":"Expiration Date","fieldName":"Expiration_Date__c","dataType":"date","value":"","isRequired":false,"validation":{"validationFormula":"eachLineSummaryField.Effective_Date__c < eachLineSummaryField.Expiration_Date__c","validationMessage":"Expiration Date should be greater than Effective Date"}},{"label":"Qty","fieldName":"Quantity__c","dataType":"number","value":"1","isRequired":true},{"label":"Status","fieldName":"Status__c","dataType":"text","value":"Active","isRequired":false}],"detailFields":[{"label":"List Price","fieldName":"List_Price__c","dataType":"text","value":"","isRequired":false,"validationFormula":"eachLineSummaryField.Effective_Date__c < eachLineSummaryField.Expiration_Date__c"},{"label":"Sales Price","fieldName":"Sales_Price__c","dataType":"number","value":"","isRequired":false}]}';
+const ENTFIELDS = 'Name, Entitlemen_Date__c, Sales_Rep__c, Purchase_Order__c, Invoice_ID__c, Invoice_ID__c, Entitlement_Note__c';
+const LINEITEMFIELDS = '{"summaryFields":[{"label":"Catalog Item ID","fieldName":"Catalog_Item__c","dataType":"text","value":"","isRequired":true,"isLookup":true,"lookupDetails": {"objectApiName":"Catalog__c"}},{"label":"Effective Date","fieldName":"Effective_Date__c","dataType":"date","value":"","isRequired":false,"validation":{"validationFormula":"eachLineSummaryField.Effective_Date__c < eachLineSummaryField.Expiration_Date__c","validationMessage":"Effective Date should be less than Expiration Date"}},{"label":"Expiration Date","fieldName":"Expiration_Date__c","dataType":"date","value":"","isRequired":false,"validation":{"validationFormula":"eachLineSummaryField.Effective_Date__c < eachLineSummaryField.Expiration_Date__c","validationMessage":"Expiration Date should be greater than Effective Date"}},{"label":"Qty","fieldName":"Qty__c","dataType":"number","value":"1","isRequired":true},{"label":"Status","fieldName":"Status__c","dataType":"text","value":"Active","isRequired":false,"isPicklist":true,"picklistValues": [{"label":"ACTIVE","value":"ACTIVE"},{"label":"INACTIVE","value":"INACTIVE"},{"label":"ACTIVE AND INACTIVE","value":"ACTIVE AND INACTIVE"}]}],"detailFields":[{"label":"License Code","fieldName":"Activation_code__c","dataType":"text","value":"","isRequired":false},{"label":"License Model","fieldName":"License_Model__c","dataType":"text","value":"","isRequired":false,"isLookup":true,"lookupDetails": {"objectApiName":"License_Model__c"}}]}';
 
 export default class CreateEntitlement extends NavigationMixin(LightningElement) {
     @api recordId;
@@ -151,7 +152,7 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
                 fieldsToSubmit[eachField.fieldName] = eachField.value;
             }
         })
-        fieldsToSubmit['sobjecttype'] = 'objectApiNameEntitlement';
+        fieldsToSubmit['sobjecttype'] = this.objectApiNameEntitlement;
         this.createLineItems(fieldsToSubmit);
         //this.template.querySelector('lightning-record-edit-form').submit(fieldsToSubmit);
     }
@@ -162,15 +163,20 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
         let lineItemFields = new Array();
         this.lineItems.forEach( (eachLine) => {
             const fields = {};
-            fields['sobjecttype'] = 'objectApiNameLineItem';
-            eachLine.summaryFields.forEach( (eachLineSummaryField) => {
+            fields['sobjecttype'] = this.objectApiNameLineItem;
+            eachLine?.summaryFields?.forEach( (eachLineSummaryField) => {
                 if(eachLineSummaryField.value != undefined && eachLineSummaryField.value != null && eachLineSummaryField.value != ""){
                     fields[eachLineSummaryField.fieldName] = eachLineSummaryField.value;
                 }
             });
-            eachLine.detailFields.forEach( (eachLineDetailField) => {
+            eachLine?.detailFields?.forEach( (eachLineDetailField) => {
                 if(eachLineDetailField.value != undefined && eachLineDetailField.value != null && eachLineDetailField.value != ""){
                     fields[eachLineDetailField.fieldName] = eachLineDetailField.value;
+                }
+            });
+            eachLine?.otherFields?.forEach( (eachLineOtherField) => {
+                if(eachLineOtherField.value != undefined && eachLineOtherField.value != null && eachLineOtherField.value != ""){
+                    fields[eachLineOtherField.fieldName] = eachLineOtherField.value;
                 }
             });
             lineItemFields.push(fields);
@@ -212,49 +218,59 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
                         fieldUi = this.template.querySelector(`lightning-combobox[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
                     }
                 }
-                if(lineItem[eachField.fieldName] != undefined && lineItem[eachField.fieldName] != null && lineItem[eachField.fieldName] != ""){
-                    if(eachField.validation){
-                        if(!eval(eachField.validation.validationFormula)){
-                            fieldUi.setCustomValidity(eachField.validation.validationMessage);
-                            fieldUi.reportValidity();
-                            hasErrors = true;
+                if(fieldUi){
+                    if(lineItem[eachField.fieldName] != undefined && lineItem[eachField.fieldName] != null && lineItem[eachField.fieldName] != ""){
+                        if(eachField.validation){
+                            if(!eval(eachField.validation.validationFormula)){
+                                fieldUi.setCustomValidity(eachField.validation.validationMessage);
+                                fieldUi.reportValidity();
+                                hasErrors = true;
+                            } else{
+                                fieldUi.setCustomValidity('');
+                                fieldUi.reportValidity();
+                            }
                         } else{
                             fieldUi.setCustomValidity('');
                             fieldUi.reportValidity();
                         }
-                    } else{
-                        fieldUi.setCustomValidity('');
-                        fieldUi.reportValidity();
-                    }
-                } else if(lineItem[eachField.fieldName] == undefined || lineItem[eachField.fieldName] == null || lineItem[eachField.fieldName] == ""){
-                    if(eachField.isRequired){
-                        fieldUi.setCustomValidity('Complete this field.');
-                        fieldUi.reportValidity();
-                        hasErrors = true;
+                    } else if(lineItem[eachField.fieldName] == undefined || lineItem[eachField.fieldName] == null || lineItem[eachField.fieldName] == ""){
+                        if(eachField.isRequired){
+                            fieldUi.setCustomValidity('Complete this field.');
+                            fieldUi.reportValidity();
+                            hasErrors = true;
+                        }
                     }
                 }
             });
             self.lineItemFieldsObject.detailFields.forEach( eachField => {
                 let fieldUi = this.template.querySelector(`lightning-input[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
-                if(lineItem[eachField.fieldName] != undefined && lineItem[eachField.fieldName] != null && lineItem[eachField.fieldName] != ""){
-                    if(eachField.validation){
-                        if(!eval(eachField.validation.validationFormula)){
-                            fieldUi.setCustomValidity(eachField.validation.validationMessage);
-                            fieldUi.reportValidity();
-                            hasErrors = true;
+                if(fieldUi == null || fieldUi == undefined){
+                    fieldUi = this.template.querySelector(`lightning-record-picker[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
+                    if(fieldUi == null || fieldUi == undefined){
+                        fieldUi = this.template.querySelector(`lightning-combobox[data-id='${index+1}'][data-name='${eachField.fieldName}']`);
+                    }
+                }
+                if(fieldUi){
+                    if(lineItem[eachField.fieldName] != undefined && lineItem[eachField.fieldName] != null && lineItem[eachField.fieldName] != ""){
+                        if(eachField.validation){
+                            if(!eval(eachField.validation.validationFormula)){
+                                fieldUi.setCustomValidity(eachField.validation.validationMessage);
+                                fieldUi.reportValidity();
+                                hasErrors = true;
+                            } else{
+                                fieldUi.setCustomValidity('');
+                                fieldUi.reportValidity();
+                            }
                         } else{
                             fieldUi.setCustomValidity('');
                             fieldUi.reportValidity();
                         }
-                    } else{
-                        fieldUi.setCustomValidity('');
-                        fieldUi.reportValidity();
-                    }
-                } else if(lineItem[eachField.fieldName] == undefined || lineItem[eachField.fieldName] == null || lineItem[eachField.fieldName] == ""){
-                    if(eachField.isRequired){
-                        fieldUi.setCustomValidity('Complete this field.');
-                        fieldUi.reportValidity();
-                        hasErrors = true;
+                    } else if(lineItem[eachField.fieldName] == undefined || lineItem[eachField.fieldName] == null || lineItem[eachField.fieldName] == ""){
+                        if(eachField.isRequired){
+                            fieldUi.setCustomValidity('Complete this field.');
+                            fieldUi.reportValidity();
+                            hasErrors = true;
+                        }
                     }
                 }
             });
@@ -280,5 +296,54 @@ export default class CreateEntitlement extends NavigationMixin(LightningElement)
                 actionName: 'view',
             },
         })
+    }
+
+    onFileUpload(event){
+        let relevantLine = event.target.dataset.id;
+        const file = event.target.files[0];
+        var reader = new FileReader();
+        reader.onload = () => {
+            var base64 = reader.result.split(',')[1];
+            let fileData = {
+                'filename': file.name,
+                'base64': base64,
+                'recordId': this.recordId,
+                'fileContent': atob(base64)
+            };
+            if(fileData.filename.includes('.txt')){
+                uploadFile({
+                    base64: fileData.base64,
+                    filename: fileData.filename,
+                    recordId: this.recordId
+                }).then(result => {
+                    if(result){
+                        this.lineItems.forEach( (eachLine) => {
+                            if(eachLine.lineNumber == relevantLine){
+                                eachLine.otherFields = [
+                                    { fieldName: 'License_Information__c', value: fileData.fileContent},
+                                    { fieldName: 'License_File_Reference__c', value: result}
+                                ];
+                                eachLine.fileName = fileData.filename;
+                            }
+                        });
+                    }
+                }).catch(error => {
+                    const toastEvt = new ShowToastEvent({
+                        variant: "error",
+                        title: "Something went wrong!",
+                        message: this.errorMessage ? this.errorMessage : error.body.message
+                    });
+                    this.dispatchEvent(toastEvt);
+                });
+            } else{
+                const toastEvt = new ShowToastEvent({
+                    variant: "error",
+                    title: "Incorrect File Format!",
+                    message: 'Allowed file format is Text (.txt)'
+                });
+                this.dispatchEvent(toastEvt);
+            }
+        }
+        reader.readAsDataURL(file)
     }
 }

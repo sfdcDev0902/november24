@@ -105,7 +105,7 @@
                                         <template for:each={eachLineItem.detailFields} for:item="eachLineItemDetailField">
                                             <lightning-layout-item padding="horizontal-medium" size="6" key={eachLineItemDetailField.fieldName}>
                                                 <template lwc:if={eachLineItemDetailField.isPicklist}>
-                                                    <lightning-combobox variant="label-hidden" 
+                                                    <lightning-combobox label={eachLineItemDetailField.label}
                                                                         name={eachLineItemDetailField.label} 
                                                                         value={eachLineItemDetailField.value} 
                                                                         data-id={eachLineItem.lineNumber} 
@@ -136,7 +136,16 @@
                                             </lightning-layout-item>
                                         </template>
                                         <lightning-layout-item padding="horizontal-medium" size="6">
-                                            <lightning-file-upload label="Attach Document" variant="label-inline"></lightning-file-upload>
+                                            <lightning-input type="file" 
+                                                             accept=".txt"
+                                                             label="Attach Document" 
+                                                             data-id={eachLineItem.lineNumber}
+                                                             onchange={onFileUpload}>
+                                            </lightning-input>
+                                            <template if:true={eachLineItem.fileName}>
+                                                <lightning-icon icon-name="doctype:txt" size="xx-small"></lightning-icon>
+                                                <span>{eachLineItem.fileName}</span>
+                                            </template>
                                         </lightning-layout-item>
                                     </lightning-layout>
                                 </div>
